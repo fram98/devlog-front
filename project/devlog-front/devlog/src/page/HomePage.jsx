@@ -8,7 +8,6 @@ import CategorySection from '../components/category/CategorySection';
 import TechStackSection from '../components/techstack/TechStackSection';
 import { ArrowRight } from 'lucide-react';
 
-// Import API services
 import { postService, categoryService, techStackService } from '../services/api';
 
 const HomePage = () => {

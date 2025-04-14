@@ -2,7 +2,7 @@ import React from 'react';
 import { Clock, Tag } from 'lucide-react';
 
 const FeaturedPost = ({ post }) => {
-  const { title, excerpt, coverImage, date, author, categories, readTime } = post;
+  const { title, excerpt, coverImage, date, author, categories, readTime} = post;
   
   return (
     <div className="relative group rounded-2xl overflow-hidden shadow-lg transition-all duration-500 hover:shadow-2xl bg-gradient-to-br from-blue-600/90 to-indigo-700/90">

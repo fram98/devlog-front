@@ -39,10 +39,6 @@ export const postService = {
   getPostById: (id) => fetchData(`/api/posts/${id}`),
   
   // Get all posts (with optional params)
-  getAllPosts: (params = {}) => {
-    const queryParams = new URLSearchParams(params).toString();
-    return fetchData(`/api/posts?${queryParams}`);
-  },
 };
 
 /**

@@ -2,122 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import { Search, ChevronRight, TrendingUp, ArrowUpRight, Plus } from 'lucide-react';
-
-// 목업 데이터
-const mockCategories = [
-  {
-    id: 1,
-    name: "데이터베이스",
-    slug: "database",
-    description: "SQL, NoSQL, 데이터 모델링, 성능 최적화 등에 관한 포스트",
-    icon: "🗄️",
-    postCount: 48,
-    color: "blue",
-    featured: true,
-    latestPosts: [
-      { id: 101, title: "PostgreSQL 성능 최적화 전략", date: "2025-04-02" },
-      { id: 102, title: "MongoDB 스키마 설계 패턴", date: "2025-03-25" }
-    ]
-  },
-  {
-    id: 2,
-    name: "아키텍처",
-    slug: "architecture",
-    description: "시스템 설계, 마이크로서비스, 도메인 주도 설계에 대한 기술 포스트",
-    icon: "🏗️",
-    postCount: 35,
-    color: "indigo",
-    featured: true,
-    latestPosts: [
-      { id: 201, title: "마이크로서비스 아키텍처 구현 사례", date: "2025-03-28" },
-      { id: 202, title: "도메인 주도 설계 실전", date: "2025-03-15" }
-    ]
-  },
-  {
-    id: 3,
-    name: "DevOps",
-    slug: "devops",
-    description: "CI/CD, 컨테이너화, 클라우드 인프라, 자동화에 관한 내용",
-    icon: "🔄",
-    postCount: 41,
-    color: "emerald",
-    featured: true,
-    latestPosts: [
-      { id: 301, title: "Kubernetes 실전 가이드", date: "2025-04-01" },
-      { id: 302, title: "GitOps 워크플로우 구축", date: "2025-03-20" }
-    ]
-  },
-  {
-    id: 4,
-    name: "API 설계",
-    slug: "api-design",
-    description: "RESTful API, GraphQL, gRPC, API 보안에 관한 포스트",
-    icon: "🔌",
-    postCount: 29,
-    color: "amber",
-    featured: false,
-    latestPosts: [
-      { id: 401, title: "GraphQL 도입 가이드", date: "2025-03-22" },
-      { id: 402, title: "REST API 보안 모범 사례", date: "2025-03-10" }
-    ]
-  },
-  {
-    id: 5,
-    name: "보안",
-    slug: "security",
-    description: "인증, 권한 부여, 암호화, 취약점 관리에 대한 기술 포스트",
-    icon: "🔒",
-    postCount: 32,
-    color: "red",
-    featured: false,
-    latestPosts: [
-      { id: 501, title: "OAuth 2.0 완벽 가이드", date: "2025-03-18" },
-      { id: 502, title: "HTTPS 깊이 이해하기", date: "2025-03-05" }
-    ]
-  },
-  {
-    id: 6,
-    name: "성능 최적화",
-    slug: "performance",
-    description: "프로파일링, 부하 테스트, 캐싱, 스케일링에 관한 내용",
-    icon: "⚡",
-    postCount: 26,
-    color: "orange",
-    featured: false,
-    latestPosts: [
-      { id: 601, title: "백엔드 애플리케이션 성능 튜닝", date: "2025-03-27" },
-      { id: 602, title: "캐싱 전략 비교", date: "2025-03-12" }
-    ]
-  },
-  {
-    id: 7,
-    name: "테스트",
-    slug: "testing",
-    description: "단위 테스트, 통합 테스트, 테스트 자동화에 관한 포스트",
-    icon: "🧪",
-    postCount: 30,
-    color: "purple",
-    featured: false,
-    latestPosts: [
-      { id: 701, title: "TDD 기반 백엔드 개발", date: "2025-03-22" },
-      { id: 702, title: "테스트 자동화 파이프라인", date: "2025-03-08" }
-    ]
-  },
-  {
-    id: 8,
-    name: "클라우드",
-    slug: "cloud",
-    description: "AWS, Azure, GCP, 서버리스, 클라우드 아키텍처에 관한 내용",
-    icon: "☁️",
-    postCount: 37,
-    color: "cyan",
-    featured: false,
-    latestPosts: [
-      { id: 801, title: "AWS Lambda 아키텍처", date: "2025-03-29" },
-      { id: 802, title: "멀티 클라우드 전략", date: "2025-03-15" }
-    ]
-  }
-];
+import { categoryService } from '../services/api';
 
 // 색상 매핑
 const colorMap = {
@@ -193,42 +78,47 @@ const CategoriesPage = ({ isDarkMode, toggleDarkMode }) => {
   const [featuredCategories, setFeaturedCategories] = useState([]);
   const [otherCategories, setOtherCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   // 초기 데이터 로드 및 필터링
   useEffect(() => {
-    // API 호출 시뮬레이션
-    const loadData = () => {
-      setIsLoading(true);
-      
-      // 지연 시뮬레이션
-      setTimeout(() => {
-        const featured = mockCategories.filter(cat => cat.featured);
-        const others = mockCategories.filter(cat => !cat.featured);
+    const loadCategories = async () => {
+      try {
+        setIsLoading(true);
+        const categoriesData = await categoryService.getAllCategories();
+        
+        // 카테고리 분류 (featured와 non-featured로 구분)
+        const featured = categoriesData.filter(cat => cat.featured);
+        const others = categoriesData.filter(cat => !cat.featured);
         
         setFeaturedCategories(featured);
         setOtherCategories(others);
-        setFilteredCategories(mockCategories);
+        setFilteredCategories(categoriesData);
         setIsLoading(false);
-      }, 500);
+      } catch (err) {
+        console.error('Error loading categories:', err);
+        setError('카테고리를 불러오는 중 오류가 발생했습니다.');
+        setIsLoading(false);
+      }
     };
     
-    loadData();
+    loadCategories();
   }, []);
   
   // 검색 기능
   useEffect(() => {
     if (searchQuery.trim() === '') {
-      setFilteredCategories(mockCategories);
+      setFilteredCategories([...featuredCategories, ...otherCategories]);
       return;
     }
     
-    const filtered = mockCategories.filter(category => 
+    const filtered = [...featuredCategories, ...otherCategories].filter(category => 
       category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       category.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
     
     setFilteredCategories(filtered);
-  }, [searchQuery]);
+  }, [searchQuery, featuredCategories, otherCategories]);
   
   // 검색 제출 핸들러
   const handleSearchSubmit = (e) => {
@@ -253,7 +143,7 @@ const CategoriesPage = ({ isDarkMode, toggleDarkMode }) => {
   const FeaturedCategoryCard = ({ category }) => (
     <div className="group relative rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 h-full border border-gray-100/60 dark:border-gray-700/40">
       {/* 헤더 배경 */}
-      <div className={`h-28 bg-gradient-to-r ${colorMap[category.color]} p-6 relative overflow-hidden`}>
+      <div className={`h-28 bg-gradient-to-r ${colorMap[category.colorName]} p-6 relative overflow-hidden`}>
         {/* 배경 패턴 */}
         <div className="absolute inset-0 opacity-10">
           <svg className="h-full w-full" viewBox="0 0 80 80">
@@ -286,13 +176,13 @@ const CategoriesPage = ({ isDarkMode, toggleDarkMode }) => {
         </p>
         
         {/* 최근 포스트 */}
-        <div className={`p-3 rounded-xl ${getColorClasses(category.color, 'bg')} ${getColorClasses(category.color, 'border')} border`}>
+        <div className={`p-3 rounded-xl ${getColorClasses(category.colorName, 'bg')} ${getColorClasses(category.colorName, 'border')} border`}>
           <div className="flex items-center text-xs font-medium mb-2">
-            <TrendingUp className={`w-3.5 h-3.5 mr-1.5 ${getColorClasses(category.color, 'text')}`} />
-            <span className={getColorClasses(category.color, 'text')}>최근 포스트</span>
+            <TrendingUp className={`w-3.5 h-3.5 mr-1.5 ${getColorClasses(category.colorName, 'text')}`} />
+            <span className={getColorClasses(category.colorName, 'text')}>최근 포스트</span>
           </div>
           <ul className="space-y-2">
-            {category.latestPosts.map(post => (
+            {category.latestPosts && category.latestPosts.map(post => (
               <li key={post.id} className="text-sm">
                 <a href={`/post/${post.id}`} className="hover:underline text-gray-700 dark:text-gray-300">
                   {post.title}
@@ -304,7 +194,7 @@ const CategoriesPage = ({ isDarkMode, toggleDarkMode }) => {
         
         {/* 더보기 아이콘 */}
         <div className="absolute bottom-4 right-4">
-          <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${getColorClasses(category.color, 'bg')} ${getColorClasses(category.color, 'text')} opacity-0 group-hover:opacity-100 transition-all duration-300`}>
+          <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${getColorClasses(category.colorName, 'bg')} ${getColorClasses(category.colorName, 'text')} opacity-0 group-hover:opacity-100 transition-all duration-300`}>
             <ArrowUpRight className="w-4 h-4" />
           </span>
         </div>
@@ -322,7 +212,7 @@ const CategoriesPage = ({ isDarkMode, toggleDarkMode }) => {
     <div className="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-500 h-full border border-gray-100/60 dark:border-gray-700/40">
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${getColorClasses(category.color, 'bg')}`}>
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${getColorClasses(category.colorName, 'bg')}`}>
             {category.icon}
           </div>
           <span className="px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs">
@@ -339,10 +229,10 @@ const CategoriesPage = ({ isDarkMode, toggleDarkMode }) => {
         
         {/* 더보기 링크 */}
         <div className="mt-4 flex items-center text-sm font-medium">
-          <span className={`${getColorClasses(category.color, 'text')} group-hover:underline`}>
+          <span className={`${getColorClasses(category.colorName, 'text')} group-hover:underline`}>
             포스트 보기
           </span>
-          <ChevronRight className={`w-4 h-4 ml-1 transition-transform duration-300 ${getColorClasses(category.color, 'text')} group-hover:translate-x-1`} />
+          <ChevronRight className={`w-4 h-4 ml-1 transition-transform duration-300 ${getColorClasses(category.colorName, 'text')} group-hover:translate-x-1`} />
         </div>
       </div>
       
@@ -352,6 +242,31 @@ const CategoriesPage = ({ isDarkMode, toggleDarkMode }) => {
       </a>
     </div>
   );
+  
+  // 에러 화면
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
+        <Header isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+        
+        <main className="flex-grow flex items-center justify-center">
+          <div className="text-center max-w-md mx-auto p-6">
+            <div className="text-red-500 text-5xl mb-4">!</div>
+            <h2 className="text-2xl font-bold mb-2 dark:text-white">오류가 발생했습니다</h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              다시 시도
+            </button>
+          </div>
+        </main>
+        
+        <Footer />
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">

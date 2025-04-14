@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Clock, ArrowUpRight, BookOpen, Heart } from 'lucide-react';
 
 const PostCard = ({ post }) => {
-  const { id, title, excerpt, coverImage, date, author, categories, readTime } = post;
+  const { id, title, excerpt, coverImage, date, author, categories, readTime, views, likes } = post;
   const [isHovered, setIsHovered] = useState(false);
   
   // 게시일 형식 변환
@@ -65,7 +65,7 @@ const PostCard = ({ post }) => {
           </div>
           <div className="flex items-center">
             <BookOpen className="w-3.5 h-3.5 mr-1.5" />
-            <span>{(Math.random() * 1000).toFixed(0)}+ 조회</span>
+            <span>{views}+ 조회</span>
           </div>
         </div>
         
@@ -103,7 +103,7 @@ const PostCard = ({ post }) => {
           {/* 좋아요 버튼 */}
           <button className="group/like flex items-center space-x-1 text-gray-400 hover:text-rose-500 dark:hover:text-rose-400 transition-colors">
             <Heart className="w-4 h-4 group-hover/like:fill-current" />
-            <span className="text-xs">{(Math.random() * 100).toFixed(0)}</span>
+            <span className="text-xs">{likes}</span>
           </button>
         </div>
       </div>
